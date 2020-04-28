@@ -20,6 +20,25 @@ public class Snake {
         this.d = x;
     }
     
+    public Coordinate next() {
+        Coordinate head = body.peekFirst();
+        switch (d) {
+        case UP:
+            return new Coordinate(head.getX(), head.getY() - 1);
+        case DOWN:
+            return new Coordinate(head.getX(), head.getY() + 1);
+        case RIGHT:
+            return new Coordinate(head.getX() + 1, head.getY());
+        case LEFT:
+            return new Coordinate(head.getX() - 1, head.getY());
+    }
+    return null;
+    }
+    
+    public Deque<Coordinate> getDeque() {
+        return this.body;
+    }
+    
     public Direction getDirection() {
         return this.d;
     }

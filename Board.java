@@ -1,6 +1,9 @@
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+import java.util.Deque;
+import java.util.LinkedList;
+import java.util.Iterator;
 
 public class Board extends JPanel {
     private Snake snake;
@@ -12,7 +15,7 @@ public class Board extends JPanel {
     public Board(JLabel status) {
         setBorder(BorderFactory.createLineBorder(Color.BLACK));
 
-        Timer timer = new Timer(100, new ActionListener() {
+        Timer timer = new Timer(200, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 tick();
             }
@@ -55,12 +58,17 @@ public class Board extends JPanel {
         snake = new Snake();
         board = new BoardState[20][20];
         food = this.randomize();
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board[0].length; j++) {
+                board[i][j] = BoardState.EMPTY;
+            }
+        }
         board[food.getX()][food.getY()] = BoardState.FOOD;
-        board[9][8] = BoardState.SNAKE;
+        board[7][9] = BoardState.SNAKE;
+        board[8][9] = BoardState.SNAKE;
         board[9][9] = BoardState.SNAKE;
-        board[9][10] = BoardState.SNAKE;
-        board[9][7] = BoardState.SNAKE;
-        board[9][11] = BoardState.SNAKE;
+        board[10][9] = BoardState.SNAKE;
+        board[11][9] = BoardState.SNAKE;
         playing = true;
     }
     
@@ -74,34 +82,46 @@ public class Board extends JPanel {
         return  ret;
     }
     
-    public void emptify(Coordinate x) {
-        board[x.getX()][x.getY()] = BoardState.EMPTY;
-    }
+//    public void emptify(Coordinate x) {
+//        board[x.getY()][x.getX()] = BoardState.EMPTY;
+//    }
     
     void tick() {
         if (playing) {
             // advance the square and snitch in their current direction.
-            Snake copy = snake;
-            copy.move();
-            if (copy.getHead().equals(food)) {
-                Coordinate x = snake.grow();
-                board[x.getX()][x.getY()] = BoardState.SNAKE;
-                board[food.getX()][food.getY()] = BoardState.EMPTY;
-                Coordinate newFood = this.randomize();
-                board[newFood.getX()][newFood.getY()] = BoardState.FOOD;
-            } else {
-                Coordinate x = snake.move();
-                this.emptify(x);
+            for (int i = 0; i < board.length; i++) {
+                for (int j = 0; j < board[0].length; j++) {
+                    board[i][j] = BoardState.EMPTY;
+                }
             }
+            if (snake.next().equals(food)) {
+                snake.grow();
+                Coordinate newFood = this.randomize();
+                this.food = newFood;
+            } else {
+                snake.move();
+            }
+            board[food.getY()][food.getX()] = BoardState.FOOD;
             // check for the game end conditions
             Coordinate head = snake.getHead();
+            System.out.println(snake);
+            System.out.println(snake.getHead());
+            //snake.collision(head)
             if (snake.getHead().getX() < 0
                     || snake.getHead().getX() >= board.length 
                     || snake.getHead().getY() < 0
                     || snake.getHead().getY() >= board.length ) {
                 playing = false;
                 status.setText("You lose!");
+                return;
             } 
+            Deque<Coordinate> deque = snake.getDeque();
+            Iterator<Coordinate> iter = deque.iterator();
+            Coordinate curr = null;
+            while (iter.hasNext()) {
+                curr = iter.next();
+                board[curr.getY()][curr.getX()] = BoardState.SNAKE;
+            }
             // update the display
             repaint();
         }
@@ -114,17 +134,17 @@ public class Board extends JPanel {
             for (int j = 0; j < board[0].length; j++) {
                 if (board[i][j] == BoardState.EMPTY) {
                         g.setColor(Color.WHITE);
-                        g.fillRect(i * 20, j * 20, 
+                        g.fillRect(j * 20, i * 20, 
                                 20, 20);
                 }
                 if (board[i][j] == BoardState.SNAKE) {
                     g.setColor(Color.BLUE);
-                    g.fillRect(i * 20, j * 20, 
+                    g.fillRect(j * 20, i * 20, 
                             20, 20);
                 }
                 if (board[i][j] == BoardState.FOOD) {
                     g.setColor(Color.YELLOW);
-                    g.fillOval(i * 20, j * 20, 
+                    g.fillOval(j * 20, i * 20, 
                             20, 20);
                 }
             }
