@@ -31,7 +31,7 @@ public class Snake {
             return new Coordinate(head.getX() + 1, head.getY());
         case LEFT:
             return new Coordinate(head.getX() - 1, head.getY());
-    }
+        }
     return null;
     }
     
@@ -49,8 +49,8 @@ public class Snake {
     
     public boolean isInSnake(Coordinate x) {
         Deque<Coordinate> copy = body;
-        for (int i = 0; i < body.size(); i++) {
-            if (copy.pollFirst().equals(x)) {
+        for (Coordinate c : copy) {
+            if (c.equals(x)) {
                 return true;
             }
         }
@@ -58,10 +58,11 @@ public class Snake {
     }
     
     public boolean collision(Coordinate x) {
-        Deque<Coordinate> copy = body;
-        copy.pollFirst();
-        while (!copy.isEmpty()) {
-            if (copy.pollFirst().equals(x)) {
+        for (Coordinate c : body) {
+            if (c.equals(this.getHead())) {
+                continue;
+            }
+            if (c.equals(x)) {
                 return true;
             }
         }

@@ -15,7 +15,7 @@ public class Board extends JPanel {
     public Board(JLabel status) {
         setBorder(BorderFactory.createLineBorder(Color.BLACK));
 
-        Timer timer = new Timer(200, new ActionListener() {
+        Timer timer = new Timer(150, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 tick();
             }
@@ -56,6 +56,10 @@ public class Board extends JPanel {
     
     public void reset() {
         snake = new Snake();
+//        Deque<Coordinate> d = snake.getDeque();
+//        for (Coordinate c : d) {
+//            System.out.println(c);
+//        }
         board = new BoardState[20][20];
         food = this.randomize();
         for (int i = 0; i < board.length; i++) {
@@ -83,9 +87,6 @@ public class Board extends JPanel {
         return  ret;
     }
     
-//    public void emptify(Coordinate x) {
-//        board[x.getY()][x.getX()] = BoardState.EMPTY;
-//    }
     
     void tick() {
         if (playing) {
@@ -94,6 +95,11 @@ public class Board extends JPanel {
                 for (int j = 0; j < board[0].length; j++) {
                     board[i][j] = BoardState.EMPTY;
                 }
+            }
+            if (snake.collision(snake.next())) {
+                playing = false;
+                status.setText("You lose!");
+                return;
             }
             if (snake.next().equals(food)) {
                 snake.grow();
@@ -104,7 +110,7 @@ public class Board extends JPanel {
             }
             board[food.getY()][food.getX()] = BoardState.FOOD;
             // check for the game end conditions
-            Coordinate head = snake.getHead();
+//            Coordinate head = snake.getHead();
             //snake.collision(head)
             if (snake.getHead().getX() < 0
                     || snake.getHead().getX() >= board.length 
@@ -115,11 +121,8 @@ public class Board extends JPanel {
                 return;
             } 
             Deque<Coordinate> deque = snake.getDeque();
-            Iterator<Coordinate> iter = deque.iterator();
-            Coordinate curr = head;
-            while (iter.hasNext()) {
-                curr = iter.next();
-                board[curr.getY()][curr.getX()] = BoardState.SNAKE;
+            for (Coordinate c : deque) {
+                board[c.getY()][c.getX()] = BoardState.SNAKE;
             }
             // update the display
             repaint();
