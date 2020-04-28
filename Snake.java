@@ -1,5 +1,7 @@
 import java.util.Deque;
 import java.util.LinkedList;
+import java.util.Iterator;
+import java.util.List;
 
 public class Snake {
     private Direction d;
@@ -13,7 +15,7 @@ public class Snake {
         body.addFirst(new Coordinate(9, 9));
         body.addFirst(new Coordinate(9, 8));
         body.addFirst(new Coordinate(9, 7));
-        d = Direction.UP;
+        d = Direction.WAITING;
     }
     
     public void setDirection(Direction x) {
@@ -23,6 +25,8 @@ public class Snake {
     public Coordinate next() {
         Coordinate head = body.peekFirst();
         switch (d) {
+        case WAITING: 
+            return null;
         case UP:
             return new Coordinate(head.getX(), head.getY() - 1);
         case DOWN:
@@ -57,12 +61,11 @@ public class Snake {
         return false;
     }
     
-    public boolean collision(Coordinate x) {
-        for (Coordinate c : body) {
-            if (c.equals(this.getHead())) {
-                continue;
-            }
-            if (c.equals(x)) {
+    public boolean collision() {
+        Iterator<Coordinate> iter = body.iterator();
+        iter.next();
+        while (iter.hasNext()) {
+            if (this.getHead().equals(iter.next())) {
                 return true;
             }
         }
@@ -72,6 +75,8 @@ public class Snake {
     public void move() {
         Coordinate head = body.peekFirst();
         switch (d) {
+            case WAITING:
+                return;
             case UP:
                 body.addFirst(new Coordinate(head.getX(), head.getY() - 1));
                 body.removeLast();
@@ -94,6 +99,8 @@ public class Snake {
     public void grow() {
         Coordinate head = body.peekFirst();
         switch (d) {
+            case WAITING:
+                return;
             case UP:
                 body.addFirst(new Coordinate(head.getX(), head.getY() - 1));
                 break;
@@ -108,4 +115,27 @@ public class Snake {
                 break;
         }
     }
+    
+    public void aiMove(Coordinate food, BoardState[][] board, boolean grow) {
+        Coordinate head = body.peekFirst();
+        List<Coordinate> path = BFS.snakeFind(board, head, food);
+        if (path.get(1) == null) {
+            body.addFirst(new Coordinate(head.getX(), head.getY() - 1));
+        } else {
+            body.addFirst(path.get(1));
+        }
+        if (!grow) {
+            body.removeLast();
+        }
+    }
+    
+    public Coordinate aiNext(Coordinate food, BoardState[][] board) {
+        Coordinate head = body.peekFirst();
+        List<Coordinate> path = BFS.snakeFind(board, head, food);
+        if (path.size() == 0) {
+            return null;
+        }
+        return path.get(1);
+    }
+    
 }

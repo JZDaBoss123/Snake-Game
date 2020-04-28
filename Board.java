@@ -10,12 +10,15 @@ public class Board extends JPanel {
     private BoardState[][] board;
     private Coordinate food;
     private JLabel status;
+    private JLabel scoreLabel;
     private boolean playing = false;
+    private int score;
+    private boolean aiMode = false;
     
-    public Board(JLabel status) {
+    public Board(JLabel status, JLabel score) {
         setBorder(BorderFactory.createLineBorder(Color.BLACK));
 
-        Timer timer = new Timer(150, new ActionListener() {
+        Timer timer = new Timer(100, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 tick();
             }
@@ -49,17 +52,13 @@ public class Board extends JPanel {
                 }
             }
         });
-
+        this.scoreLabel = score;
         this.status = status;
     }
     
     
     public void reset() {
         snake = new Snake();
-//        Deque<Coordinate> d = snake.getDeque();
-//        for (Coordinate c : d) {
-//            System.out.println(c);
-//        }
         board = new BoardState[20][20];
         food = this.randomize();
         for (int i = 0; i < board.length; i++) {
@@ -74,6 +73,10 @@ public class Board extends JPanel {
         board[10][9] = BoardState.SNAKE;
         board[11][9] = BoardState.SNAKE;
         playing = true;
+        aiMode = false;
+        score = 0;
+        status.setText("Running... | ");
+        repaint();
         requestFocusInWindow();
     }
     
@@ -84,35 +87,90 @@ public class Board extends JPanel {
         if (snake.isInSnake(ret)) {
             return this.randomize();
         }
-        return  ret;
+        return ret;
+    }
+    
+    public void flipAI() {
+        aiMode = !aiMode;
+    }
+    
+    public void giveup() {
+        playing = false;
+        aiMode = false;
+        status.setText("AI gives up :(");
+        return;
     }
     
     
     void tick() {
-        if (playing) {
-            // advance the square and snitch in their current direction.
+        if (aiMode) {
             for (int i = 0; i < board.length; i++) {
                 for (int j = 0; j < board[0].length; j++) {
                     board[i][j] = BoardState.EMPTY;
                 }
             }
-            if (snake.collision(snake.next())) {
+            Deque<Coordinate> deque = snake.getDeque();
+            for (Coordinate c : deque) {
+                board[c.getY()][c.getX()] = BoardState.SNAKE;
+            }
+            //no direction needed
+            Coordinate next = snake.aiNext(food, board);
+            if (next == null) {
+                giveup();
+                return;
+            }
+            if (next.equals(food)) {
+                snake.aiMove(food, board, true);
+                Coordinate newFood = this.randomize();
+                this.score += 10;
+                this.food = newFood;
+            } else {
+                snake.aiMove(this.food, this.board, false);
+            }
+            for (int i = 0; i < board.length; i++) {
+                for (int j = 0; j < board[0].length; j++) {
+                    board[i][j] = BoardState.EMPTY;
+                }
+            }
+            board[food.getY()][food.getX()] = BoardState.FOOD;
+            // check for the game end conditions
+            if (snake.getHead().getX() < 0 || snake.collision()
+                    || snake.getHead().getX() >= board.length 
+                    || snake.getHead().getY() < 0
+                    || snake.getHead().getY() >= board.length ) {
                 playing = false;
-                status.setText("You lose!");
+                aiMode = false;
+                status.setText("AI loses!");
+                return;
+            } 
+            Deque<Coordinate> deque2 = snake.getDeque();
+            for (Coordinate c : deque2) {
+                board[c.getY()][c.getX()] = BoardState.SNAKE;
+            }
+            // update the display
+            repaint();
+            return;
+        }
+        if (playing) {
+            for (int i = 0; i < board.length; i++) {
+                for (int j = 0; j < board[0].length; j++) {
+                    board[i][j] = BoardState.EMPTY;
+                }
+            }
+            if (snake.getDirection() == Direction.WAITING) {
                 return;
             }
             if (snake.next().equals(food)) {
                 snake.grow();
                 Coordinate newFood = this.randomize();
+                this.score += 10;
                 this.food = newFood;
             } else {
                 snake.move();
             }
             board[food.getY()][food.getX()] = BoardState.FOOD;
             // check for the game end conditions
-//            Coordinate head = snake.getHead();
-            //snake.collision(head)
-            if (snake.getHead().getX() < 0
+            if (snake.getHead().getX() < 0 || snake.collision()
                     || snake.getHead().getX() >= board.length 
                     || snake.getHead().getY() < 0
                     || snake.getHead().getY() >= board.length ) {
@@ -151,6 +209,7 @@ public class Board extends JPanel {
                 }
             }
         }
+        scoreLabel.setText("Score = " + this.score);
     }
 
     @Override
