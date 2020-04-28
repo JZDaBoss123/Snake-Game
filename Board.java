@@ -70,6 +70,7 @@ public class Board extends JPanel {
         board[10][9] = BoardState.SNAKE;
         board[11][9] = BoardState.SNAKE;
         playing = true;
+        requestFocusInWindow();
     }
     
     public Coordinate randomize() {
@@ -104,8 +105,6 @@ public class Board extends JPanel {
             board[food.getY()][food.getX()] = BoardState.FOOD;
             // check for the game end conditions
             Coordinate head = snake.getHead();
-            System.out.println(snake);
-            System.out.println(snake.getHead());
             //snake.collision(head)
             if (snake.getHead().getX() < 0
                     || snake.getHead().getX() >= board.length 
@@ -117,7 +116,7 @@ public class Board extends JPanel {
             } 
             Deque<Coordinate> deque = snake.getDeque();
             Iterator<Coordinate> iter = deque.iterator();
-            Coordinate curr = null;
+            Coordinate curr = head;
             while (iter.hasNext()) {
                 curr = iter.next();
                 board[curr.getY()][curr.getX()] = BoardState.SNAKE;

@@ -16,7 +16,10 @@ public class Coordinate {
         return this.y;
     }
     
-    
+    @Override
+    public String toString() {
+        return String.format("x: %d, y: %d", this.getX(), this.getY());
+    }
     
     @Override
     public boolean equals(Object obj) { 

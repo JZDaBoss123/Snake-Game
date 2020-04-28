@@ -68,41 +68,43 @@ public class Snake {
         return false;
     }
     
-    public Coordinate move() {
+    public void move() {
         Coordinate head = body.peekFirst();
         switch (d) {
             case UP:
                 body.addFirst(new Coordinate(head.getX(), head.getY() - 1));
-                return body.pollLast();
+                body.removeLast();
+                return;
             case DOWN:
                 body.addFirst(new Coordinate(head.getX(), head.getY() + 1));
-                return body.pollLast();
+                body.removeLast();
+                return;
             case RIGHT:
                 body.addFirst(new Coordinate(head.getX() + 1, head.getY()));
-                return body.pollLast();
+                body.removeLast();
+                return;
             case LEFT:
                 body.addFirst(new Coordinate(head.getX() - 1, head.getY()));
-                return body.pollLast();
+                body.removeLast();
+                return;
         }
-        return null; //dummy
     }
     
-    public Coordinate grow() {
+    public void grow() {
         Coordinate head = body.peekFirst();
         switch (d) {
             case UP:
                 body.addFirst(new Coordinate(head.getX(), head.getY() - 1));
-                return body.peekFirst();
+                break;
             case DOWN:
                 body.addFirst(new Coordinate(head.getX(), head.getY() + 1));
-                return body.peekFirst();
+                break;
             case RIGHT:
                 body.addFirst(new Coordinate(head.getX() + 1, head.getY()));
-                return body.peekFirst();
+                break;
             case LEFT:
                 body.addFirst(new Coordinate(head.getX() - 1, head.getY()));
-                return body.peekFirst();
+                break;
         }
-        return null; //dummy
     }
 }
