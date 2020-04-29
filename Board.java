@@ -5,6 +5,8 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.Iterator;
 
+//getters and setters are purely for unit testing
+
 public class Board extends JPanel {
     private Snake snake;
     private BoardState[][] board;
@@ -18,7 +20,7 @@ public class Board extends JPanel {
     public Board(JLabel status, JLabel score) {
         setBorder(BorderFactory.createLineBorder(Color.BLACK));
 
-        Timer timer = new Timer(100, new ActionListener() {
+        Timer timer = new Timer(80, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 tick();
             }
@@ -40,7 +42,8 @@ public class Board extends JPanel {
                     }
                     snake.setDirection(Direction.RIGHT);
                 } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-                    if (snake.getDirection() == Direction.UP) {
+                    if (snake.getDirection() == Direction.UP
+                            || snake.getDirection() == Direction.WAITING) {
                         return;
                     }
                     snake.setDirection(Direction.DOWN);
@@ -54,6 +57,30 @@ public class Board extends JPanel {
         });
         this.scoreLabel = score;
         this.status = status;
+    }
+    
+    public void setSnakeDirection(Direction x) {
+        this.snake.setDirection(x);
+    }
+    
+    public void setFood(int x, int y) {
+        this.food = new Coordinate(x, y);
+    }
+    
+    public void setFood(Coordinate x) {
+        this.food = x;
+    }
+    
+    public Coordinate getFood() {
+        return this.food;
+    }
+    
+    public int getScore() {
+        return this.score;
+    }
+    
+    public boolean isPlaying() {
+        return this.playing;
     }
     
     
@@ -90,6 +117,10 @@ public class Board extends JPanel {
         return ret;
     }
     
+    public boolean aiMode() {
+        return this.aiMode;
+    }
+    
     public void flipAI() {
         aiMode = !aiMode;
     }
@@ -99,6 +130,14 @@ public class Board extends JPanel {
         aiMode = false;
         status.setText("AI gives up :(");
         return;
+    }
+    
+    Snake getSnake() {
+        return this.snake;
+    }
+    
+    BoardState[][] getBoard() {
+        return this.board;
     }
     
     
@@ -140,7 +179,7 @@ public class Board extends JPanel {
                     || snake.getHead().getY() >= board.length ) {
                 playing = false;
                 aiMode = false;
-                status.setText("AI loses!");
+                status.setText("AI loses!"); //very unlikely AI does this well, so not really needed
                 return;
             } 
             Deque<Coordinate> deque2 = snake.getDeque();

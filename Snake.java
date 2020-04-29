@@ -119,7 +119,7 @@ public class Snake {
     public void aiMove(Coordinate food, BoardState[][] board, boolean grow) {
         Coordinate head = body.peekFirst();
         List<Coordinate> path = BFS.snakeFind(board, head, food);
-        if (path.get(1) == null) {
+        if (path.size() == 0|| path.get(1) == null) {
             body.addFirst(new Coordinate(head.getX(), head.getY() - 1));
         } else {
             body.addFirst(path.get(1));
